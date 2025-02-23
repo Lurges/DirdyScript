@@ -136,12 +136,6 @@ ESPTab:AddToggle({
     end    
 })
 
-local AimbotTab = Window:MakeTab({
-    Name = "Aimbot",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
 AimbotTab:AddToggle({
     Name = "NigBot",
     Default = false,
