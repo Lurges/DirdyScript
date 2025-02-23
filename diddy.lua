@@ -8,12 +8,11 @@ local Window = OrionLib:MakeWindow({
 })
 
 OrionLib:MakeNotification({
-	Name = "Title!",
+	Name = "JOIN UP NOW CUH",
 	Content = "Join The Diddy Discord - https://discord.gg/cUjbFJydgJ",
 	Image = "rbxassetid://4483345998",
-	Time = 5
+	Time = 99999999
 })
-
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -26,19 +25,28 @@ local ESPEnabled = false
 local NigBotEnabled = false
 local AimLocked = false
 
--- Create ESP for players
-local function createESP(player)
-    if player ~= LocalPlayer and player.Character then
-        local char = player.Character
-        if not char:FindFirstChild("GoonESP") then
-            local highlight = Instance.new("Highlight")
-            highlight.Name = "GoonESP"
-            highlight.Parent = char
-            highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red
-            highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
-            highlight.FillTransparency = 0.2
-            highlight.OutlineTransparency = 0
+-- Create ESP for players (keeps applying after respawn)
+local function applyESP(player)
+    if player ~= LocalPlayer then
+        local function setupCharacter(character)
+            if character and not character:FindFirstChild("GoonESP") then
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "GoonESP"
+                highlight.Parent = character
+                highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
+                highlight.FillTransparency = 0.2
+                highlight.OutlineTransparency = 0
+            end
         end
+
+        -- Apply ESP if character already exists
+        if player.Character then
+            setupCharacter(player.Character)
+        end
+
+        -- Reapply ESP when character respawns
+        player.CharacterAdded:Connect(setupCharacter)
     end
 end
 
@@ -54,20 +62,18 @@ local function toggleESP(enable)
     ESPEnabled = enable
     for _, player in pairs(Players:GetPlayers()) do
         if enable then
-            createESP(player)
+            applyESP(player)
         else
             removeESP(player)
         end
     end
 end
 
--- Auto-update ESP when players spawn
+-- Auto-update ESP when new players join
 Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        if ESPEnabled then
-            createESP(player)
-        end
-    end)
+    if ESPEnabled then
+        applyESP(player)
+    end
 end)
 
 -- Find closest player to crosshair
@@ -89,18 +95,17 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- Aimlock function
+-- Aimlock function (Instant Hard Lock)
 local function aimlock()
     if not NigBotEnabled or not AimLocked then return end
 
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPosition = target.Character.HumanoidRootPart.Position
-        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPosition), 0.15) -- Smooth aim
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.HumanoidRootPart.Position)
     end
 end
 
--- Detect RMB Hold
+-- Detect RMB Hold for Aimlock
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Right Mouse Button
         AimLocked = true
@@ -113,7 +118,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Update loop
+-- Update loop (Aimlock runs every frame)
 RunService.RenderStepped:Connect(aimlock)
 
 -- ESP & Aimbot UI
