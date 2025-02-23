@@ -122,13 +122,13 @@ end)
 RunService.RenderStepped:Connect(aimlock)
 
 -- ESP & Aimbot UI
-local ESPTab = Window:MakeTab({
-    Name = "ESP",
+local Tab1 = Window:MakeTab({
+    Name = "Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-ESPTab:AddToggle({
+Tab1:AddToggle({
     Name = "GoonESP",
     Default = false,
     Callback = function(Value)
@@ -136,7 +136,7 @@ ESPTab:AddToggle({
     end    
 })
 
-AimbotTab:AddToggle({
+Tab1:AddToggle({
     Name = "NigBot",
     Default = false,
     Callback = function(Value)
