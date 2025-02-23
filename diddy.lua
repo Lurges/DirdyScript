@@ -1,54 +1,76 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 local Window = OrionLib:MakeWindow({
-  Name = "DiddyHub",
-  HidePremium = false,
-  SaveConfig = true,
-  ConfigFolder = "OrionTest",
-  IntroEnabled = false
+    Name = "DiddyHub",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "OrionTest",
+    IntroEnabled = false
 })
 
-local Players = game:GetService("Players")
-local HighlightToggled = false
+OrionLib:MakeNotification({
+	Name = "Title!",
+	Content = "Join The Diddy Discord - https://discord.gg/cUjbFJydgJ",
+	Image = "rbxassetid://4483345998",
+	Time = 5
+})
 
-local function highlightPlayers(enable)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local root = player.Character.HumanoidRootPart
-            
-            -- Check if already has adornment
-            if enable then
-                if not root:FindFirstChild("HighlightBox") then
-                    local box = Instance.new("BoxHandleAdornment")
-                    box.Name = "HighlightBox"
-                    box.Parent = root
-                    box.Adornee = root
-                    box.Size = Vector3.new(4, 6, 4)
-                    box.Color3 = Color3.fromRGB(255, 0, 0) -- Red
-                    box.Transparency = 0.5
-                    box.AlwaysOnTop = true
-                    box.ZIndex = 2
-                end
-            else
-                if root:FindFirstChild("HighlightBox") then
-                    root:FindFirstChild("HighlightBox"):Destroy()
-                end
-            end
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ESPEnabled = false
+
+local function createESP(player)
+    if player ~= Players.LocalPlayer and player.Character then
+        local char = player.Character
+        if not char:FindFirstChild("GoonESP") then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "GoonESP"
+            highlight.Parent = char
+            highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
+            highlight.FillTransparency = 0.2
+            highlight.OutlineTransparency = 0
         end
     end
 end
 
-local Toggle = Window:MakeTab({
-  Name = "ESP",
-  Icon = "rbxassetid://4483345998",
-  PremiumOnly = false
+local function removeESP(player)
+    if player.Character and player.Character:FindFirstChild("GoonESP") then
+        player.Character.GoonESP:Destroy()
+    end
+end
+
+local function toggleESP(enable)
+    ESPEnabled = enable
+    for _, player in pairs(Players:GetPlayers()) do
+        if enable then
+            createESP(player)
+        else
+            removeESP(player)
+        end
+    end
+end
+
+-- Keep updating ESP when players spawn
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        if ESPEnabled then
+            createESP(player)
+        end
+    end)
+end)
+
+local ESPTab = Window:MakeTab({
+    Name = "Features",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
 })
 
-Toggle:AddToggle({
-    Name = "Highlight Players",
+ESPTab:AddToggle({
+    Name = "GoonESP",
     Default = false,
     Callback = function(Value)
-        HighlightToggled = Value
-        highlightPlayers(Value)
+        toggleESP(Value)
     end    
 })
 
