@@ -7,66 +7,49 @@ local Window = OrionLib:MakeWindow({
   IntroEnabled = false
 })
 
--- Notification
-OrionLib:MakeNotification({
-  Name = "Alert!",
-  Content = "Remember To Join The Discord - https://discord.gg/cUjbFJydgJ",
-  Image = "rbxassetid://10337369781",
-  Time = 5
-})
+local Players = game:GetService("Players")
+local HighlightToggled = false
 
--- Create a Tab
-local Tab = Window:MakeTab({
-  Name = "Features",
-  Icon = "rbxassetid://4483345998", -- Ensure this is a valid asset ID
+local function highlightPlayers(enable)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = player.Character.HumanoidRootPart
+            
+            -- Check if already has adornment
+            if enable then
+                if not root:FindFirstChild("HighlightBox") then
+                    local box = Instance.new("BoxHandleAdornment")
+                    box.Name = "HighlightBox"
+                    box.Parent = root
+                    box.Adornee = root
+                    box.Size = Vector3.new(4, 6, 4)
+                    box.Color3 = Color3.fromRGB(255, 0, 0) -- Red
+                    box.Transparency = 0.5
+                    box.AlwaysOnTop = true
+                    box.ZIndex = 2
+                end
+            else
+                if root:FindFirstChild("HighlightBox") then
+                    root:FindFirstChild("HighlightBox"):Destroy()
+                end
+            end
+        end
+    end
+end
+
+local Toggle = Window:MakeTab({
+  Name = "ESP",
+  Icon = "rbxassetid://4483345998",
   PremiumOnly = false
 })
 
--- Button
-Tab:AddButton({
-  Name = "TestButton",
-  Callback = function()
-    print("DiddyHub TestButton")
-  end    
+Toggle:AddToggle({
+    Name = "Highlight Players",
+    Default = false,
+    Callback = function(Value)
+        HighlightToggled = Value
+        highlightPlayers(Value)
+    end    
 })
 
--- Toggle
-local CoolToggle = Tab:AddToggle({
-  Name = "DiddyHubTestToggle",
-  Default = false,
-  Callback = function(Value)
-    print(Value)
-    CoolToggle:Set(true) -- This will set the toggle to true
-  end    
-})
-
--- Slider
-local Slider = Tab:AddSlider({
-  Name = "SlideMeYourShit",
-  Min = 0,
-  Max = 20,
-  Default = 5,
-  Color = Color3.fromRGB(255,16,240),
-  Increment = 1,
-  ValueName = "Baby Oil",
-  Callback = function(Value)
-    print(Value)
-    Slider:Set(2) -- This will set the slider to 2
-  end    
-})
-
--- Label
-Tab:AddLabel("This is a label little gooner")
-
--- Dropdown
-Tab:AddDropdown({
-  Name = "This is a fricking dropdown",
-  Default = "Goon",
-  Options = {"Goon", "Edge"},
-  Callback = function(Value)
-    print(Value)
-  end    
-})
-
--- Initialize Orion Library
 OrionLib:Init()
