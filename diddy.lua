@@ -8,11 +8,12 @@ local Window = OrionLib:MakeWindow({
 })
 
 OrionLib:MakeNotification({
-	Name = "JOIN UP NOW CUH",
+	Name = "!Fat Daddy Join Up!",
 	Content = "Join The Diddy Discord - https://discord.gg/cUjbFJydgJ",
 	Image = "rbxassetid://4483345998",
-	Time = 99999999
+	Time = 5
 })
+
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -25,7 +26,7 @@ local ESPEnabled = false
 local NigBotEnabled = false
 local AimLocked = false
 
--- Create ESP for players (keeps applying after respawn)
+-- Function to create ESP
 local function applyESP(player)
     if player ~= LocalPlayer then
         local function setupCharacter(character)
@@ -40,12 +41,12 @@ local function applyESP(player)
             end
         end
 
-        -- Apply ESP if character already exists
+        -- Apply ESP if character exists
         if player.Character then
             setupCharacter(player.Character)
         end
 
-        -- Reapply ESP when character respawns
+        -- Reapply ESP when player respawns
         player.CharacterAdded:Connect(setupCharacter)
     end
 end
@@ -69,7 +70,7 @@ local function toggleESP(enable)
     end
 end
 
--- Auto-update ESP when new players join
+-- Update ESP for new players joining
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then
         applyESP(player)
@@ -95,7 +96,7 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- Aimlock function (Instant Hard Lock)
+-- Aimlock function (Instant Lock-On)
 local function aimlock()
     if not NigBotEnabled or not AimLocked then return end
 
@@ -105,7 +106,7 @@ local function aimlock()
     end
 end
 
--- Detect RMB Hold for Aimlock
+-- Detect Right Click Hold for Aimlock
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Right Mouse Button
         AimLocked = true
@@ -121,14 +122,14 @@ end)
 -- Update loop (Aimlock runs every frame)
 RunService.RenderStepped:Connect(aimlock)
 
--- ESP & Aimbot UI
-local Tab1 = Window:MakeTab({
+-- UI: Features Tab
+local FeaturesTab = Window:MakeTab({
     Name = "Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-Tab1:AddToggle({
+FeaturesTab:AddToggle({
     Name = "GoonESP",
     Default = false,
     Callback = function(Value)
@@ -136,7 +137,7 @@ Tab1:AddToggle({
     end    
 })
 
-Tab1:AddToggle({
+FeaturesTab:AddToggle({
     Name = "NigBot",
     Default = false,
     Callback = function(Value)
