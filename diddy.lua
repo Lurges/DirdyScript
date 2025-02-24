@@ -157,16 +157,39 @@ Players.PlayerAdded:Connect(function(player)
     end
 end)
 
--- Aimbot Function (Now Locks to Head & Turns Off Correctly)
+-- Hard Lock AimBot (Locks Instantly to Closest Head in FOV)
 local function aimlock()
     if not NigBotEnabled then return end -- Only run if enabled
 
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
+        -- Instantly snap to the enemy's head
         Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
     end
 end
 
+-- Get Closest Enemy Inside FOV Circle
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = AimFOV  -- Only check inside FOV
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local screenPosition, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
+
+            if onScreen then
+                local distance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Aimlock Activation (Hold Right Click)
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then 
         NigBotEnabled = true -- Enable aimbot when right-click is held
@@ -174,6 +197,7 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
+-- Aimlock Deactivation (Release Right Click)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         NigBotEnabled = false -- Disable aimbot when right-click is released
@@ -181,14 +205,13 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-
+-- Constantly Run Aimlock (Every Frame)
 RunService.RenderStepped:Connect(function()
     if NigBotEnabled then
         aimlock()
     end
-    updateFOV()
+    updateFOV()  -- Update FOV circle position
 end)
-
 
 -- Hitbox Expander Function (Non-Collidable)
 local function expandHitbox(player, size)
