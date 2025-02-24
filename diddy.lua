@@ -33,6 +33,45 @@ local HitboxSize = 2
 local AimFOV = 100
 local AimStrength = 100
 
+local Friends = {}
+
+-- add friend
+local function addFriend(username)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name == username then
+            Friends[player.UserId] = true
+            OrionLib:MakeNotification({
+                Name = "Friend Added",
+                Content = username .. " has been added to your friend list!",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+            return
+        end
+    end
+    OrionLib:MakeNotification({
+        Name = "Error",
+        Content = "Player not found! Make sure they are in the game.",
+        Image = "rbxassetid://4483345998",
+        Time = 5
+    })
+end
+
+local FriendsTab = Window:MakeTab({
+    Name = "Friends",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+FriendsTab:AddTextbox({
+    Name = "Add Friend",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(username)
+        addFriend(username)
+    end
+})
+
 -- Create FOV Circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Radius = AimFOV
@@ -214,9 +253,8 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Hitbox Expander Function (Non-Collidable)
-
 local function expandHitbox(player, size)
-    if player ~= LocalPlayer and player.Character then
+    if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
         local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
             or player.Character:FindFirstChild("Torso") 
             or player.Character:FindFirstChild("UpperTorso") -- Use alternative parts
@@ -247,7 +285,7 @@ end
 local function updateHitboxes(size)
     HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
+        if player ~= LocalPlayer and not Friends[player.UserId] then
             expandHitbox(player, size)
         end
     end
@@ -257,13 +295,15 @@ end
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         task.wait(0.5) -- Give time for character to load
-        expandHitbox(player, HitboxSize)
+        if not Friends[player.UserId] then
+            expandHitbox(player, HitboxSize)
+        end
     end)
 end)
 
 -- Apply hitbox to all players (when feature is turned on)
 for _, player in pairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
+    if player ~= LocalPlayer and not Friends[player.UserId] then
         expandHitbox(player, HitboxSize)
     end
 end
@@ -271,11 +311,12 @@ end
 -- Constantly update the hitboxes for all players
 RunService.Heartbeat:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
+        if player ~= LocalPlayer and not Friends[player.UserId] then
             expandHitbox(player, HitboxSize) -- Keep expanding hitbox
         end
     end
 end)
+
 
 -- UI: Features Tab
 local FeaturesTab = Window:MakeTab({
@@ -331,7 +372,7 @@ FeaturesTab:AddSlider({
 FeaturesTab:AddSlider({
     Name = "BigBackExpander",
     Min = 2,
-    Max = 20,
+    Max = 60,
     Default = 2,
     Color = Color3.fromRGB(0, 255, 0),
     Increment = 1,
