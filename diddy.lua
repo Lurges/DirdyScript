@@ -67,44 +67,43 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- ESP Function (Now Stays on Respawned Players)
+-- Function to apply ESP
 local function applyESP(player)
-    local function setupCharacter(character)
-        if character and not character:FindFirstChild("GoonESP") then
-            local highlight = Instance.new("Highlight")
-            highlight.Name = "GoonESP"
-            highlight.Parent = character
-            highlight.FillColor = Color3.fromRGB(255, 0, 0)
-            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-            highlight.FillTransparency = 0.2
-            highlight.OutlineTransparency = 0
+    if player ~= LocalPlayer then -- Prevent ESP on yourself
+        local function setupCharacter(character)
+            if character and not character:FindFirstChild("GoonESP") then
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "GoonESP"
+                highlight.Parent = character
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                highlight.FillTransparency = 0.2
+                highlight.OutlineTransparency = 0
+            end
         end
-    end
 
-    if player.Character then
-        setupCharacter(player.Character)
-    end
-
-    player.CharacterAdded:Connect(function(char)
-        if ESPEnabled then
-            setupCharacter(char)
+        if player.Character then
+            setupCharacter(player.Character)
         end
-    end)
-end
 
-local function removeESP(player)
-    if player.Character and player.Character:FindFirstChild("GoonESP") then
-        player.Character.GoonESP:Destroy()
+        player.CharacterAdded:Connect(function(char)
+            if ESPEnabled then
+                setupCharacter(char)
+            end
+        end)
     end
 end
 
+-- Toggle ESP for all players
 local function toggleESP(enable)
     ESPEnabled = enable
     for _, player in pairs(Players:GetPlayers()) do
         if enable then
             applyESP(player)
         else
-            removeESP(player)
+            if player.Character and player.Character:FindFirstChild("GoonESP") then
+                player.Character.GoonESP:Destroy()
+            end
         end
     end
 end
