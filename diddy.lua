@@ -44,7 +44,8 @@ FOVCircle.Visible = false
 
 -- Update FOV Circle Position
 local function updateFOV()
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
+    local viewportSize = Camera.ViewportSize
+    FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2) -- Center it properly
     FOVCircle.Radius = AimFOV
 end
 
