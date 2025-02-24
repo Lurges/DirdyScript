@@ -268,6 +268,15 @@ for _, player in pairs(Players:GetPlayers()) do
     end
 end
 
+-- Constantly update the hitboxes for all players
+RunService.Heartbeat:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            expandHitbox(player, HitboxSize) -- Keep expanding hitbox
+        end
+    end
+end)
+
 -- UI: Features Tab
 local FeaturesTab = Window:MakeTab({
     Name = "Features",
