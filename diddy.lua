@@ -13,6 +13,8 @@ local UserInputService = game:GetService("UserInputService")
 local Camera = game:GetService("Workspace").CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
+local LocalPlayer = Players.LocalPlayer
+local Players = game:GetService("Players")
 
 local ESPEnabled = false
 local NigBotEnabled = false
@@ -69,22 +71,24 @@ end
 
 -- Function to apply ESP
 local function applyESP(player)
-    if player ~= LocalPlayer then -- Prevent ESP on yourself
+    if player ~= LocalPlayer then -- Don't apply ESP to yourself
         local function setupCharacter(character)
-            if character and not character:FindFirstChild("GoonESP") then
+            if character and not character:FindFirstChild("ESPBox") then
                 local highlight = Instance.new("Highlight")
-                highlight.Name = "GoonESP"
+                highlight.Name = "ESPBox"
                 highlight.Parent = character
-                highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White
                 highlight.FillTransparency = 0.2
                 highlight.OutlineTransparency = 0
-                
-                -- Prevent highlighting hitboxes
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") and part.Name == "HumanoidRootPart" then
-                        highlight.Adornee = nil -- Remove highlight from hitbox part
-                    end
+
+                -- Make sure we do NOT highlight the expanded hitbox
+                local adorneePart = character:FindFirstChild("Head") or character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+
+                if adorneePart then
+                    highlight.Adornee = adorneePart
+                else
+                    highlight:Destroy() -- Prevent broken ESP
                 end
             end
         end
@@ -93,8 +97,9 @@ local function applyESP(player)
             setupCharacter(player.Character)
         end
 
-        -- Update ESP when player respawns
+        -- Apply ESP when they respawn
         player.CharacterAdded:Connect(function(char)
+            task.wait(0.5) -- Small delay to make sure character loads
             if ESPEnabled then
                 setupCharacter(char)
             end
@@ -103,13 +108,13 @@ local function applyESP(player)
 end
 
 local function removeESP(player)
-    if player.Character and player.Character:FindFirstChild("GoonESP") then
-        player.Character.GoonESP:Destroy()
+    if player.Character and player.Character:FindFirstChild("ESPBox") then
+        player.Character.ESPBox:Destroy()
     end
 end
 
--- Constantly check for missing ESP and update
-local function checkESP()
+-- Constantly check and fix missing ESP
+local function updateESP()
     while ESPEnabled do
         for _, player in pairs(Players:GetPlayers()) do
             if ESPEnabled then
@@ -118,14 +123,14 @@ local function checkESP()
                 removeESP(player)
             end
         end
-        task.wait(1) -- Check every second to update ESP
+        task.wait(1) -- Check every second
     end
 end
 
 local function toggleESP(enable)
     ESPEnabled = enable
     if enable then
-        checkESP() -- Start loop to update ESP constantly
+        updateESP() -- Start checking constantly
     else
         for _, player in pairs(Players:GetPlayers()) do
             removeESP(player)
@@ -133,6 +138,7 @@ local function toggleESP(enable)
     end
 end
 
+-- Ensure new players get ESP when they join
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then
         applyESP(player)
