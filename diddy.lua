@@ -135,7 +135,7 @@ end)
 
 -- Aimbot Function (Now Locks to Head & Turns Off Correctly)
 local function aimlock()
-    if not NigBotEnabled then return end
+    if not NigBotEnabled then return end -- Only run if enabled
 
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
@@ -144,15 +144,13 @@ local function aimlock()
 end
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then 
-        NigBotEnabled = true
+    if input.UserInputType == Enum.UserInputType.MouseButton2 and NigBotEnabled then 
         FOVCircle.Visible = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        NigBotEnabled = false
         FOVCircle.Visible = false
     end
 end)
@@ -163,6 +161,7 @@ RunService.RenderStepped:Connect(function()
     end
     updateFOV()
 end)
+
 
 -- Hitbox Expander Function (Non-Collidable)
 local function expandHitbox(player, size)
