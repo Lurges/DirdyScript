@@ -35,13 +35,24 @@ local function updateFOV()
     FOVCircle.Radius = AimFOV
 end
 
--- Function to get the closest player inside FOV
+-- Function to check if a player is visible
+local function isPlayerVisible(player)
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local headPos = player.Character.Head.Position
+        local ray = Ray.new(Camera.CFrame.Position, (headPos - Camera.CFrame.Position).unit * 500)
+        local part = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character, Camera})
+        return part and part:IsDescendantOf(player.Character)
+    end
+    return false
+end
+
+-- Function to get the closest visible player inside FOV
 local function getClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = AimFOV
 
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") and isPlayerVisible(player) then
             local screenPosition, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
 
             if onScreen then
@@ -159,9 +170,7 @@ end
 local function updateHitboxes(size)
     HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            expandHitbox(player, size)
-        end
+        expandHitbox(player, size)
     end
 end
 
