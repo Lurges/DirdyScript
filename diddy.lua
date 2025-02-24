@@ -214,30 +214,36 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Hitbox Expander Function (Non-Collidable)
+
 local function expandHitbox(player, size)
-    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local root = player.Character.HumanoidRootPart
-        root.Size = Vector3.new(size, size, size)
-        root.Transparency = 0.5
-        root.Material = Enum.Material.ForceField
+    if player ~= LocalPlayer and player.Character then
+        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
+            or player.Character:FindFirstChild("Torso") 
+            or player.Character:FindFirstChild("UpperTorso") -- Use alternative parts
 
-        -- Disable collision so it doesn't push you
-        root.CanCollide = false
-        root.CanTouch = false
+        if targetPart then
+            targetPart.Size = Vector3.new(size, size, size)
+            targetPart.Transparency = 0.5
+            targetPart.Material = Enum.Material.ForceField
 
-        -- Green outline
-        if not root:FindFirstChild("BigBackOutline") then
-            local selectionBox = Instance.new("SelectionBox")
-            selectionBox.Name = "BigBackOutline"
-            selectionBox.Adornee = root
-            selectionBox.Parent = root
-            selectionBox.LineThickness = 0.05
-            selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
+            -- Disable collision so it doesn't push you
+            targetPart.CanCollide = false
+            targetPart.CanTouch = false
+
+            -- Green outline
+            if not targetPart:FindFirstChild("BigBackOutline") then
+                local selectionBox = Instance.new("SelectionBox")
+                selectionBox.Name = "BigBackOutline"
+                selectionBox.Adornee = targetPart
+                selectionBox.Parent = targetPart
+                selectionBox.LineThickness = 0.05
+                selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
+            end
         end
     end
 end
 
--- Update Hitbox Expansion (Excludes Local Player)
+-- Update Hitbox Expansion (Ensures all players get it)
 local function updateHitboxes(size)
     HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
@@ -247,12 +253,20 @@ local function updateHitboxes(size)
     end
 end
 
+-- Apply hitbox expansion when players spawn
 Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5) -- Give time for character to load
+        expandHitbox(player, HitboxSize)
+    end)
+end)
+
+-- Apply hitbox to all players (when feature is turned on)
+for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         expandHitbox(player, HitboxSize)
     end
-end)
-
+end
 
 -- UI: Features Tab
 local FeaturesTab = Window:MakeTab({
