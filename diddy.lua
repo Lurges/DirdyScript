@@ -257,14 +257,12 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Friends = {} -- Your list of friends, you can populate this as needed
 
--- Function to expand hitbox
+-- Hitbox Expander Function (Non-Collidable)
 local function expandHitbox(player, size)
     if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
-        local character = player.Character
-        local targetPart = character:FindFirstChild("HumanoidRootPart")
-            or character:FindFirstChild("UpperTorso")
-            or character:FindFirstChild("LowerTorso")
-            or character:FindFirstChild("Head") -- Fallback to head if no torso parts
+        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
+            or player.Character:FindFirstChild("Torso") 
+            or player.Character:FindFirstChild("UpperTorso") -- Use alternative parts
 
         if targetPart then
             targetPart.Size = Vector3.new(size, size, size)
@@ -275,7 +273,7 @@ local function expandHitbox(player, size)
             targetPart.CanCollide = false
             targetPart.CanTouch = false
 
-            -- Add outline for visual feedback (if not already added)
+            -- Green outline
             if not targetPart:FindFirstChild("BigBackOutline") then
                 local selectionBox = Instance.new("SelectionBox")
                 selectionBox.Name = "BigBackOutline"
@@ -288,8 +286,9 @@ local function expandHitbox(player, size)
     end
 end
 
--- Update all players' hitboxes
+-- Update Hitbox Expansion (Ensures all players get it)
 local function updateHitboxes(size)
+    HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
             expandHitbox(player, size)
@@ -300,25 +299,25 @@ end
 -- Apply hitbox expansion when players spawn
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
-        task.wait(0.5) -- Wait for character to load
+        task.wait(0.5) -- Give time for character to load
         if not Friends[player.UserId] then
             expandHitbox(player, HitboxSize)
         end
     end)
 end)
 
--- Apply hitbox to all players initially
+-- Apply hitbox to all players (when feature is turned on)
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer and not Friends[player.UserId] then
         expandHitbox(player, HitboxSize)
     end
 end
 
--- Continuously update hitboxes to keep them expanded
+-- Constantly update the hitboxes for all players
 RunService.Heartbeat:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize) -- Ensure hitbox stays expanded
+            expandHitbox(player, HitboxSize) -- Keep expanding hitbox
         end
     end
 end)
