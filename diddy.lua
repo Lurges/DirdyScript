@@ -26,9 +26,6 @@ local Mouse = LocalPlayer:GetMouse()
 local LocalPlayer = Players.LocalPlayer
 local Players = game:GetService("Players")
 
- local shortestDistance = AimFOV
-local closestPlayer = nil
-local function getClosestPlayer()
 
 local ESPEnabled = false
 local NigBotEnabled = false
