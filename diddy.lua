@@ -79,6 +79,13 @@ local function applyESP(player)
                 highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
                 highlight.FillTransparency = 0.2
                 highlight.OutlineTransparency = 0
+                
+                -- Prevent highlighting hitboxes
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") and part.Name == "HumanoidRootPart" then
+                        highlight.Adornee = nil -- Remove highlight from hitbox part
+                    end
+                end
             end
         end
 
@@ -86,7 +93,7 @@ local function applyESP(player)
             setupCharacter(player.Character)
         end
 
-        -- Update when player respawns
+        -- Update ESP when player respawns
         player.CharacterAdded:Connect(function(char)
             if ESPEnabled then
                 setupCharacter(char)
@@ -101,7 +108,7 @@ local function removeESP(player)
     end
 end
 
--- Loop to always check for new players
+-- Constantly check for missing ESP and update
 local function checkESP()
     while ESPEnabled do
         for _, player in pairs(Players:GetPlayers()) do
@@ -131,7 +138,6 @@ Players.PlayerAdded:Connect(function(player)
         applyESP(player)
     end
 end)
-
 
 -- Aimbot Function (Now Locks to Head & Turns Off Correctly)
 local function aimlock()
