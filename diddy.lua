@@ -10,7 +10,7 @@ local Window = OrionLib:MakeWindow({
 OrionLib:MakeNotification({
 	Name = "JOIN THE CORD NOW DUDE",
 	Content = "Discord -https://discord.gg/cUjbFJydgJ",
-	Image = "rbxassetid://78634733259759",
+	Image = "rbxassetid://4483345998",
 	Time = 5
 })
 
