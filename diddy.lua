@@ -32,6 +32,8 @@ local NigBotEnabled = false
 local HitboxSize = 2
 local AimFOV = 100
 local AimStrength = 100
+local SpinBotEnabled = false
+local SpinSpeed = 50
 
 local Friends = {}
 
@@ -71,6 +73,21 @@ FriendsTab:AddTextbox({
         addFriend(username)
     end
 })
+
+-- Function to perform SpinBot
+local function spinbot()
+    while SpinBotEnabled do
+        local target = getClosestPlayer()
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            -- Instantly snap to the enemy's head while spinning
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) * CFrame.Angles(0, math.rad(SpinSpeed), 0)
+        else
+            -- If no target, just spin in place
+            Camera.CFrame = Camera.CFrame * CFrame.Angles(0, math.rad(SpinSpeed), 0)
+        end
+        task.wait(0.01) -- Small delay to prevent crashing
+    end
+end
 
 -- Create FOV Circle
 local FOVCircle = Drawing.new("Circle")
@@ -385,6 +402,31 @@ FeaturesTab:AddSlider({
     ValueName = "Hitbox Size",
     Callback = function(Value)
         updateHitboxes(Value)
+    end    
+})
+
+
+SpinBotTab:AddToggle({
+    Name = "Enable SpinBot",
+    Default = false,
+    Callback = function(Value)
+        SpinBotEnabled = Value
+        if Value then
+            task.spawn(spinbot) -- Start spinning
+        end
+    end    
+})
+
+SpinBotTab:AddSlider({
+    Name = "Spin Speed",
+    Min = 10,
+    Max = 200,
+    Default = 50,
+    Color = Color3.fromRGB(0, 255, 255),
+    Increment = 5,
+    ValueName = "Speed",
+    Callback = function(Value)
+        SpinSpeed = Value
     end    
 })
 
