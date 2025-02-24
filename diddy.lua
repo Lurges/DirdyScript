@@ -156,16 +156,19 @@ local function aimlock()
 end
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 and NigBotEnabled then 
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then 
+        NigBotEnabled = true -- Enable aimbot when right-click is held
         FOVCircle.Visible = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        NigBotEnabled = false -- Disable aimbot when right-click is released
         FOVCircle.Visible = false
     end
 end)
+
 
 RunService.RenderStepped:Connect(function()
     if NigBotEnabled then
