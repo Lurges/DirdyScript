@@ -146,13 +146,17 @@ RunService.RenderStepped:Connect(function()
     updateFOV()
 end)
 
--- Hitbox Expander Function (Excludes Local Player)
+-- Hitbox Expander Function (Non-Collidable)
 local function expandHitbox(player, size)
     if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         root.Size = Vector3.new(size, size, size)
         root.Transparency = 0.5
         root.Material = Enum.Material.ForceField
+
+        -- Disable collision so it doesn't push you
+        root.CanCollide = false
+        root.CanTouch = false
 
         -- Green outline
         if not root:FindFirstChild("BigBackOutline") then
@@ -181,9 +185,7 @@ Players.PlayerAdded:Connect(function(player)
         expandHitbox(player, HitboxSize)
     end
 end)
-Players.PlayerAdded:Connect(function(player)
-    expandHitbox(player, HitboxSize)
-end)
+
 
 -- UI: Features Tab
 local FeaturesTab = Window:MakeTab({
