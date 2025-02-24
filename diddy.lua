@@ -7,6 +7,16 @@ local Window = OrionLib:MakeWindow({
     IntroEnabled = false
 })
 
+OrionLib:MakeNotification({
+	Name = "JOIN THE CORD NOW DUDE",
+	Content = "Discord -https://discord.gg/cUjbFJydgJ",
+	Image = "rbxassetid://78634733259759",
+	Time = 5
+})
+
+
+
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -15,6 +25,10 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local LocalPlayer = Players.LocalPlayer
 local Players = game:GetService("Players")
+
+ local shortestDistance = AimFOV
+local closestPlayer = nil
+local function getClosestPlayer()
 
 local ESPEnabled = false
 local NigBotEnabled = false
