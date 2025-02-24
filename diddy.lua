@@ -146,9 +146,9 @@ RunService.RenderStepped:Connect(function()
     updateFOV()
 end)
 
--- Hitbox Expander Function
+-- Hitbox Expander Function (Excludes Local Player)
 local function expandHitbox(player, size)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         root.Size = Vector3.new(size, size, size)
         root.Transparency = 0.5
@@ -166,14 +166,21 @@ local function expandHitbox(player, size)
     end
 end
 
--- Update Hitbox Expansion
+-- Update Hitbox Expansion (Excludes Local Player)
 local function updateHitboxes(size)
     HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
-        expandHitbox(player, size)
+        if player ~= LocalPlayer then
+            expandHitbox(player, size)
+        end
     end
 end
 
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        expandHitbox(player, HitboxSize)
+    end
+end)
 Players.PlayerAdded:Connect(function(player)
     expandHitbox(player, HitboxSize)
 end)
