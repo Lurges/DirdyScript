@@ -86,6 +86,7 @@ local function applyESP(player)
             setupCharacter(player.Character)
         end
 
+        -- Update when player respawns
         player.CharacterAdded:Connect(function(char)
             if ESPEnabled then
                 setupCharacter(char)
@@ -94,16 +95,33 @@ local function applyESP(player)
     end
 end
 
--- Toggle ESP for all players
+local function removeESP(player)
+    if player.Character and player.Character:FindFirstChild("GoonESP") then
+        player.Character.GoonESP:Destroy()
+    end
+end
+
+-- Loop to always check for new players
+local function checkESP()
+    while ESPEnabled do
+        for _, player in pairs(Players:GetPlayers()) do
+            if ESPEnabled then
+                applyESP(player)
+            else
+                removeESP(player)
+            end
+        end
+        task.wait(1) -- Check every second to update ESP
+    end
+end
+
 local function toggleESP(enable)
     ESPEnabled = enable
-    for _, player in pairs(Players:GetPlayers()) do
-        if enable then
-            applyESP(player)
-        else
-            if player.Character and player.Character:FindFirstChild("GoonESP") then
-                player.Character.GoonESP:Destroy()
-            end
+    if enable then
+        checkESP() -- Start loop to update ESP constantly
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            removeESP(player)
         end
     end
 end
@@ -113,6 +131,7 @@ Players.PlayerAdded:Connect(function(player)
         applyESP(player)
     end
 end)
+
 
 -- Aimbot Function (Now Locks to Head & Turns Off Correctly)
 local function aimlock()
