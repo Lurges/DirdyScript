@@ -35,14 +35,14 @@ local function updateFOV()
     FOVCircle.Radius = AimFOV
 end
 
--- Function to get closest player inside FOV
+-- Function to get the closest player inside FOV
 local function getClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = AimFOV
 
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local screenPosition, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local screenPosition, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
 
             if onScreen then
                 local distance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
@@ -56,7 +56,7 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- ESP Function (Tracks Players & Updates on Respawn)
+-- ESP Function (Now Stays on Respawned Players)
 local function applyESP(player)
     local function setupCharacter(character)
         if character and not character:FindFirstChild("GoonESP") then
@@ -74,7 +74,11 @@ local function applyESP(player)
         setupCharacter(player.Character)
     end
 
-    player.CharacterAdded:Connect(setupCharacter)
+    player.CharacterAdded:Connect(function(char)
+        if ESPEnabled then
+            setupCharacter(char)
+        end
+    end)
 end
 
 local function removeESP(player)
@@ -100,34 +104,34 @@ Players.PlayerAdded:Connect(function(player)
     end
 end)
 
--- Aimbot Function (Now Works Inside FOV & Respects Toggle)
+-- Aimbot Function (Now Locks to Head & Turns Off Correctly)
 local function aimlock()
     if not NigBotEnabled then return end
 
     local target = getClosestPlayer()
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPosition = target.Character.HumanoidRootPart.Position
-        local direction = (targetPosition - Camera.CFrame.Position).Unit
-        local newCFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + direction * AimStrength / 100)
-        
-        Camera.CFrame = newCFrame
+    if target and target.Character and target.Character:FindFirstChild("Head") then
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
     end
 end
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then 
         NigBotEnabled = true
+        FOVCircle.Visible = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         NigBotEnabled = false
+        FOVCircle.Visible = false
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    aimlock()
+    if NigBotEnabled then
+        aimlock()
+    end
     updateFOV()
 end)
 
