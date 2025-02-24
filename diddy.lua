@@ -372,7 +372,7 @@ FeaturesTab:AddSlider({
 FeaturesTab:AddSlider({
     Name = "BigBackExpander",
     Min = 2,
-    Max = 60,
+    Max = 200,
     Default = 2,
     Color = Color3.fromRGB(0, 255, 0),
     Increment = 1,
