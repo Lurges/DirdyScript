@@ -340,7 +340,7 @@ local FeaturesTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-FeaturesTab:AddToggle({
+FriendsTab:AddToggle({
     Name = "GoonESP",
     Default = false,
     Callback = function(Value)
@@ -349,7 +349,7 @@ FeaturesTab:AddToggle({
     end    
 })
 
-FeaturesTab:AddToggle({
+FriendsTab:AddToggle({
     Name = "NigBot",
     Default = false,
     Callback = function(Value)
@@ -358,7 +358,7 @@ FeaturesTab:AddToggle({
     end    
 })
 
-FeaturesTab:AddSlider({
+FriendsTab:AddSlider({
     Name = "Aimbot Strength",
     Min = 10,
     Max = 100,
@@ -371,7 +371,7 @@ FeaturesTab:AddSlider({
     end    
 })
 
-FeaturesTab:AddSlider({
+FriendsTab:AddSlider({
     Name = "FOV Circle Size",
     Min = 50,
     Max = 400,
@@ -384,7 +384,7 @@ FeaturesTab:AddSlider({
     end    
 })
 
-FeaturesTab:AddSlider({
+FriendsTab:AddSlider({
     Name = "BigBackExpander",
     Min = 2,
     Max = 200,
