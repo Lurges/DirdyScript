@@ -21,15 +21,15 @@ local function createGradient(color1, color2)
 end
 
 Themes = {
-    Default = {
-        Main = createGradient(Color3.fromRGB(25, 25, 25), Color3.fromRGB(50, 50, 50)),
-        Second = createGradient(Color3.fromRGB(32, 32, 32), Color3.fromRGB(64, 64, 64)),
-        Stroke = createGradient(Color3.fromRGB(60, 60, 60), Color3.fromRGB(120, 120, 120)),
-        Divider = createGradient(Color3.fromRGB(60, 60, 60), Color3.fromRGB(120, 120, 120)),
-        Text = createGradient(Color3.fromRGB(240, 240, 240), Color3.fromRGB(255, 255, 255)),
-        TextDark = createGradient(Color3.fromRGB(150, 150, 150), Color3.fromRGB(200, 200, 200))
-    }
-}
+		Default = {
+			Main = Color3.fromRGB(25, 25, 25),
+			Second = Color3.fromRGB(32, 32, 32),
+			Stroke = Color3.fromRGB(60, 60, 60),
+			Divider = Color3.fromRGB(60, 60, 60),
+			Text = Color3.fromRGB(240, 240, 240),
+			TextDark = Color3.fromRGB(150, 150, 150)
+		}
+	},
 
 	SelectedTheme = "Default",
 	Folder = nil,
