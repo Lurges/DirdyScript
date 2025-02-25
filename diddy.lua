@@ -22,13 +22,14 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
 local ESPEnabled = false
-local AimBotEnabled = false
-local HitboxSize = 2
+local NigBotEnabled = false
+local HitboxSize = 5
+local JitterAmount = 1
 local AimFOV = 100
 local AimStrength = 100
 local Friends = {}
 
--- Add Friend Function
+-- Add friend function
 local function addFriend(username)
     for _, player in pairs(Players:GetPlayers()) do
         if player.Name == username then
@@ -60,10 +61,12 @@ FeaturesTab:AddTextbox({
     Name = "Add Friend",
     Default = "",
     TextDisappear = true,
-    Callback = addFriend
+    Callback = function(username)
+        addFriend(username)
+    end
 })
 
--- FOV Circle
+-- Create FOV Circle
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Radius = AimFOV
 FOVCircle.Thickness = 1
@@ -91,9 +94,11 @@ end
 local function getClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = AimFOV
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") and isPlayerVisible(player) then
             local screenPosition, onScreen = Camera:WorldToViewportPoint(player.Character.Head.Position)
+
             if onScreen then
                 local distance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                 if distance < shortestDistance then
@@ -107,7 +112,8 @@ local function getClosestPlayer()
 end
 
 local function aimlock()
-    if not AimBotEnabled then return end
+    if not NigBotEnabled then return end
+
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
@@ -115,28 +121,82 @@ local function aimlock()
 end
 
 UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then 
-        AimBotEnabled = true
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        NigBotEnabled = true
         FOVCircle.Visible = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        AimBotEnabled = false
+        NigBotEnabled = false
         FOVCircle.Visible = false
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    if AimBotEnabled then
+    if NigBotEnabled then
         aimlock()
     end
     updateFOV()
 end)
 
+-- Hitbox Expander Function
+local function expandHitbox(player, baseSize, jitter)
+    if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
+        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
+            or player.Character:FindFirstChild("Torso") 
+            or player.Character:FindFirstChild("UpperTorso")
+
+        if targetPart then
+            local newSize = baseSize + (math.random(0, 1) * 2 - 1) * jitter
+            targetPart.Size = Vector3.new(newSize, newSize, newSize)
+            targetPart.Transparency = 0.5
+            targetPart.Material = Enum.Material.ForceField
+            targetPart.CanCollide = false
+            targetPart.CanTouch = false
+
+            if not targetPart:FindFirstChild("BigBackOutline") then
+                local selectionBox = Instance.new("SelectionBox")
+                selectionBox.Name = "BigBackOutline"
+                selectionBox.Adornee = targetPart
+                selectionBox.Parent = targetPart
+                selectionBox.LineThickness = 0.05
+                selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
+            end
+        end
+    end
+end
+
+local function updateHitboxes(baseSize, jitter)
+    HitboxSize = baseSize
+    JitterAmount = jitter
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and not Friends[player.UserId] then
+            expandHitbox(player, baseSize, jitter)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if not Friends[player.UserId] then
+            expandHitbox(player, HitboxSize, JitterAmount)
+        end
+    end)
+end)
+
+RunService.Heartbeat:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and not Friends[player.UserId] then
+            expandHitbox(player, HitboxSize, JitterAmount)
+        end
+    end
+end)
+
 FeaturesTab:AddToggle({
-    Name = "ESP",
+    Name = "GoonESP",
     Default = false,
     Callback = function(Value)
         ESPEnabled = Value
@@ -144,10 +204,10 @@ FeaturesTab:AddToggle({
 })
 
 FeaturesTab:AddToggle({
-    Name = "AimBot",
+    Name = "NigBot",
     Default = false,
     Callback = function(Value)
-        AimBotEnabled = Value
+        NigBotEnabled = Value
         FOVCircle.Visible = Value
     end    
 })
@@ -175,6 +235,19 @@ FeaturesTab:AddSlider({
     ValueName = "FOV",
     Callback = function(Value)
         AimFOV = Value
+    end    
+})
+
+FeaturesTab:AddSlider({
+    Name = "BigBackExpander",
+    Min = 2,
+    Max = 200,
+    Default = 5,
+    Color = Color3.fromRGB(0, 255, 0),
+    Increment = 1,
+    ValueName = "Hitbox Size",
+    Callback = function(Value)
+        updateHitboxes(Value, JitterAmount)
     end    
 })
 
