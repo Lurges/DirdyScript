@@ -1,4 +1,4 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Lurges/DirdyScript/refs/heads/main/base.lua')))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/Lurges/DirdyScript/refs/heads/main/base.lua'))()
 local Window = OrionLib:MakeWindow({
     Name = "DiddyHub",
     HidePremium = false,
