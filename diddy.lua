@@ -24,51 +24,12 @@ local Mouse = LocalPlayer:GetMouse()
 local ESPEnabled = false
 local NigBotEnabled = false
 local HitboxSize = 5
-local JitterAmount = 1
 local AimFOV = 100
 local AimStrength = 100
 local Friends = {}
 
--- Add friend function
-local function addFriend(username)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name == username then
-            Friends[player.UserId] = true
-            OrionLib:MakeNotification({
-                Name = "Friend Added",
-                Content = username .. " has been added to your friend list!",
-                Image = "rbxassetid://4483345998",
-                Time = 5
-            })
-            return
-        end
-    end
-    OrionLib:MakeNotification({
-        Name = "Error",
-        Content = "Player not found! Make sure they are in the game.",
-        Image = "rbxassetid://4483345998",
-        Time = 5
-    })
-end
-
-local FeaturesTab = Window:MakeTab({
-    Name = "Features",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-FeaturesTab:AddTextbox({
-    Name = "Add Friend",
-    Default = "",
-    TextDisappear = true,
-    Callback = function(username)
-        addFriend(username)
-    end
-})
-
 -- Create FOV Circle
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Radius = AimFOV
 FOVCircle.Thickness = 1
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
 FOVCircle.Filled = false
@@ -76,9 +37,14 @@ FOVCircle.Transparency = 1
 FOVCircle.Visible = false
 
 local function updateFOV()
-    local viewportSize = Camera.ViewportSize
-    FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
-    FOVCircle.Radius = AimFOV
+    if NigBotEnabled then
+        local viewportSize = Camera.ViewportSize
+        FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+        FOVCircle.Radius = AimFOV
+        FOVCircle.Visible = true
+    else
+        FOVCircle.Visible = false
+    end
 end
 
 local function isPlayerVisible(player)
@@ -123,14 +89,14 @@ end
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         NigBotEnabled = true
-        FOVCircle.Visible = true
+        updateFOV()
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         NigBotEnabled = false
-        FOVCircle.Visible = false
+        updateFOV()
     end
 end)
 
@@ -141,57 +107,43 @@ RunService.RenderStepped:Connect(function()
     updateFOV()
 end)
 
--- Hitbox Expander
-local function expandHitbox(player, size)
-    if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
-        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
-            or player.Character:FindFirstChild("Torso") 
-            or player.Character:FindFirstChild("UpperTorso")
-
-        if targetPart then
-            targetPart.Size = Vector3.new(size, size, size)
-            targetPart.Transparency = 0.5
-            targetPart.Material = Enum.Material.ForceField
-            targetPart.CanCollide = false
-
-            if not targetPart:FindFirstChild("HitboxOutline") then
-                local selectionBox = Instance.new("SelectionBox")
-                selectionBox.Name = "HitboxOutline"
-                selectionBox.Adornee = targetPart
-                selectionBox.Parent = targetPart
-                selectionBox.LineThickness = 0.05
-                selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
+-- ESP Functionality
+local function highlightPlayers()
+    if not ESPEnabled then return end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("ESP_Highlight")
+            if not highlight then
+                highlight = Instance.new("Highlight")
+                highlight.Name = "ESP_Highlight"
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.FillTransparency = 0.5
+                highlight.Parent = player.Character
             end
         end
     end
 end
 
-local function updateHitboxes(size)
-    HitboxSize = size
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, size)
-        end
-    end
-end
-
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        if not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize)
-        end
-    end)
-end)
-
 RunService.Heartbeat:Connect(function()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize)
+    if ESPEnabled then
+        highlightPlayers()
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                local highlight = player.Character:FindFirstChild("ESP_Highlight")
+                if highlight then highlight:Destroy() end
+            end
         end
     end
 end)
 
+-- UI Setup
+local FeaturesTab = Window:MakeTab({
+    Name = "Features",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
 FeaturesTab:AddToggle({
     Name = "GoonESP",
@@ -206,7 +158,7 @@ FeaturesTab:AddToggle({
     Default = false,
     Callback = function(Value)
         NigBotEnabled = Value
-        FOVCircle.Visible = Value
+        updateFOV()
     end    
 })
 
@@ -215,7 +167,7 @@ FeaturesTab:AddSlider({
     Min = 10,
     Max = 100,
     Default = 100,
-    Color = Color3.fromRGB(255, 0, 0),
+    Color = Color3.fromRGB(77, 77, 255),
     Increment = 5,
     ValueName = "Strength",
     Callback = function(Value)
@@ -228,11 +180,12 @@ FeaturesTab:AddSlider({
     Min = 50,
     Max = 400,
     Default = 100,
-    Color = Color3.fromRGB(0, 255, 0),
+    Color = Color3.fromRGB(77, 77, 255),
     Increment = 10,
     ValueName = "FOV",
     Callback = function(Value)
         AimFOV = Value
+        updateFOV()
     end    
 })
 
@@ -241,11 +194,11 @@ FeaturesTab:AddSlider({
     Min = 2,
     Max = 200,
     Default = 5,
-    Color = Color3.fromRGB(0, 255, 0),
+    Color = Color3.fromRGB(77, 77, 255),
     Increment = 1,
     ValueName = "Hitbox Size",
     Callback = function(Value)
-        updateHitboxes(Value, JitterAmount)
+        HitboxSize = Value
     end    
 })
 
