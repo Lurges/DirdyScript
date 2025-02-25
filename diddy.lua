@@ -406,7 +406,7 @@ FeaturesTab:AddSlider({
 })
 
 
-SpinBotTab:AddToggle({
+FeaturesTab:AddToggle({
     Name = "Enable SpinBot",
     Default = false,
     Callback = function(Value)
@@ -417,7 +417,7 @@ SpinBotTab:AddToggle({
     end    
 })
 
-SpinBotTab:AddSlider({
+FeaturesTab:AddSlider({
     Name = "Spin Speed",
     Min = 10,
     Max = 200,
