@@ -14,16 +14,23 @@ local OrionLib = {
 	Flags = {},
 
 
+local function createGradient(color1, color2)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new(color1, color2)
+    return gradient
+end
+
 Themes = {
     Default = {
-			Main = Color3.fromRGB(25, 25, 25),
-			Second = Color3.fromRGB(32, 32, 32),
-			Stroke = Color3.fromRGB(60, 60, 60),
-			Divider = Color3.fromRGB(60, 60, 60),
-			Text = Color3.fromRGB(240, 240, 240),
-			TextDark = Color3.fromRGB(150, 150, 150)
+        Main = createGradient(Color3.fromRGB(25, 25, 25), Color3.fromRGB(50, 50, 50)),
+        Second = createGradient(Color3.fromRGB(32, 32, 32), Color3.fromRGB(64, 64, 64)),
+        Stroke = createGradient(Color3.fromRGB(60, 60, 60), Color3.fromRGB(120, 120, 120)),
+        Divider = createGradient(Color3.fromRGB(60, 60, 60), Color3.fromRGB(120, 120, 120)),
+        Text = createGradient(Color3.fromRGB(240, 240, 240), Color3.fromRGB(255, 255, 255)),
+        TextDark = createGradient(Color3.fromRGB(150, 150, 150), Color3.fromRGB(200, 200, 200))
     }
 }
+
 	SelectedTheme = "Default",
 	Folder = nil,
 	SaveCfg = false
