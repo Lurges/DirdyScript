@@ -24,7 +24,7 @@ Themes = {
 			TextDark = Color3.fromRGB(150, 150, 150)
     }
 }
-ctedTheme = "Default",
+	SelectedTheme = "Default",
 	Folder = nil,
 	SaveCfg = false
 }
