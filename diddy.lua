@@ -141,25 +141,22 @@ RunService.RenderStepped:Connect(function()
     updateFOV()
 end)
 
--- Hitbox Expander Function
-
-local function expandHitbox(player, baseSize, jitter)
+-- Hitbox Expander
+local function expandHitbox(player, size)
     if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
         local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
             or player.Character:FindFirstChild("Torso") 
             or player.Character:FindFirstChild("UpperTorso")
 
         if targetPart then
-            local newSize = baseSize + (math.random(0, 1) * 2 - 1) * jitter
-            targetPart.Size = Vector3.new(newSize, newSize, newSize)
+            targetPart.Size = Vector3.new(size, size, size)
             targetPart.Transparency = 0.5
             targetPart.Material = Enum.Material.ForceField
             targetPart.CanCollide = false
-            targetPart.CanTouch = false
 
-            if not targetPart:FindFirstChild("BigBackOutline") then
+            if not targetPart:FindFirstChild("HitboxOutline") then
                 local selectionBox = Instance.new("SelectionBox")
-                selectionBox.Name = "BigBackOutline"
+                selectionBox.Name = "HitboxOutline"
                 selectionBox.Adornee = targetPart
                 selectionBox.Parent = targetPart
                 selectionBox.LineThickness = 0.05
@@ -169,12 +166,11 @@ local function expandHitbox(player, baseSize, jitter)
     end
 end
 
-local function updateHitboxes(baseSize, jitter)
-    HitboxSize = baseSize
-    JitterAmount = jitter
+local function updateHitboxes(size)
+    HitboxSize = size
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, baseSize, jitter)
+            expandHitbox(player, size)
         end
     end
 end
@@ -183,7 +179,7 @@ Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         task.wait(0.5)
         if not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize, JitterAmount)
+            expandHitbox(player, HitboxSize)
         end
     end)
 end)
@@ -191,10 +187,11 @@ end)
 RunService.Heartbeat:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize, JitterAmount)
+            expandHitbox(player, HitboxSize)
         end
     end
 end)
+
 
 FeaturesTab:AddToggle({
     Name = "GoonESP",
