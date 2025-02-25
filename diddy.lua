@@ -212,11 +212,6 @@ local function addFriend(username)
     })
 end
 
-local FeaturesTab = Window:MakeTab({
-    Name = "Features",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
 
 
 -- UI Setup
@@ -285,7 +280,7 @@ FeaturesTab:AddSlider({
     Min = 2,
     Max = 200,
     Default = 5,
-    Color = Color3.fromRGB(0, 255, 0),
+    Color = Color3.fromRGB(77, 77, 255),
     Increment = 1,
     ValueName = "Hitbox Size",
     Callback = function(Value)
