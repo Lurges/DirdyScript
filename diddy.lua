@@ -142,27 +142,28 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Hitbox Expander Function
+
 local function expandHitbox(player, baseSize, jitter)
     if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
-        for _, partName in pairs({"HumanoidRootPart", "Head", "Torso", "UpperTorso"}) do
-            local targetPart = player.Character:FindFirstChild(partName)
-            if targetPart then
-                local newSize = baseSize + (math.random(0, 1) * 2 - 1) * jitter
-                targetPart.Size = Vector3.new(newSize, newSize, newSize)
-                targetPart.Transparency = 0.5
-                targetPart.Material = Enum.Material.ForceField
-                targetPart.CanCollide = false
-                targetPart.CanTouch = false
+        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
+            or player.Character:FindFirstChild("Torso") 
+            or player.Character:FindFirstChild("UpperTorso")
 
-                -- Add outline to visualize
-                if not targetPart:FindFirstChild("BigBackOutline") then
-                    local selectionBox = Instance.new("SelectionBox")
-                    selectionBox.Name = "BigBackOutline"
-                    selectionBox.Adornee = targetPart
-                    selectionBox.Parent = targetPart
-                    selectionBox.LineThickness = 0.05
-                    selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
-                end
+        if targetPart then
+            local newSize = baseSize + (math.random(0, 1) * 2 - 1) * jitter
+            targetPart.Size = Vector3.new(newSize, newSize, newSize)
+            targetPart.Transparency = 0.5
+            targetPart.Material = Enum.Material.ForceField
+            targetPart.CanCollide = false
+            targetPart.CanTouch = false
+
+            if not targetPart:FindFirstChild("BigBackOutline") then
+                local selectionBox = Instance.new("SelectionBox")
+                selectionBox.Name = "BigBackOutline"
+                selectionBox.Adornee = targetPart
+                selectionBox.Parent = targetPart
+                selectionBox.LineThickness = 0.05
+                selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
             end
         end
     end
