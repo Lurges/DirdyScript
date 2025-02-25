@@ -79,13 +79,18 @@ local function spinbot()
     while SpinBotEnabled do
         local target = getClosestPlayer()
         if target and target.Character and target.Character:FindFirstChild("Head") then
-            -- Instantly snap to the enemy's head while spinning
+            -- Snap to target's head while spinning
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) * CFrame.Angles(0, math.rad(SpinSpeed), 0)
+            
+            -- Simulate left-click shooting
+            mouse1press()
+            task.wait(0.1) -- Small delay to register the click
+            mouse1release()
         else
-            -- If no target, just spin in place
+            -- If no target, spin in place
             Camera.CFrame = Camera.CFrame * CFrame.Angles(0, math.rad(SpinSpeed), 0)
         end
-        task.wait(0.01) -- Small delay to prevent crashing
+        task.wait(0.01) -- Prevent script lag
     end
 end
 
