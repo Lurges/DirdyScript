@@ -57,13 +57,13 @@ local function addFriend(username)
     })
 end
 
-local FriendsTab = Window:MakeTab({
+local FeaturesTab = Window:MakeTab({
     Name = "Friends",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-FriendsTab:AddTextbox({
+FeaturesTab:AddTextbox({
     Name = "Add Friend",
     Default = "",
     TextDisappear = true,
@@ -333,14 +333,8 @@ updateHitboxes(defaultHitboxSize, jitterAmount)
 
 
 
--- UI: Features Tab
-local FeaturesTab = Window:MakeTab({
-    Name = "Features",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
 
-FriendsTab:AddToggle({
+FeaturesTab:AddToggle({
     Name = "GoonESP",
     Default = false,
     Callback = function(Value)
@@ -349,7 +343,7 @@ FriendsTab:AddToggle({
     end    
 })
 
-FriendsTab:AddToggle({
+FeaturesTab:AddToggle({
     Name = "NigBot",
     Default = false,
     Callback = function(Value)
@@ -358,7 +352,7 @@ FriendsTab:AddToggle({
     end    
 })
 
-FriendsTab:AddSlider({
+FeaturesTab:AddSlider({
     Name = "Aimbot Strength",
     Min = 10,
     Max = 100,
@@ -371,7 +365,7 @@ FriendsTab:AddSlider({
     end    
 })
 
-FriendsTab:AddSlider({
+FeaturesTab:AddSlider({
     Name = "FOV Circle Size",
     Min = 50,
     Max = 400,
@@ -384,7 +378,7 @@ FriendsTab:AddSlider({
     end    
 })
 
-FriendsTab:AddSlider({
+FeaturesTab:AddSlider({
     Name = "BigBackExpander",
     Min = 2,
     Max = 200,
