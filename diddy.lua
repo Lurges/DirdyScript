@@ -1,4 +1,4 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/Lurges/DirdyScript/refs/heads/main/base.lua')))()
 local Window = OrionLib:MakeWindow({
     Name = "DiddyHub",
     HidePremium = false,
@@ -32,8 +32,7 @@ local NigBotEnabled = false
 local HitboxSize = 2
 local AimFOV = 100
 local AimStrength = 100
-local SpinBotEnabled = false
-local SpinSpeed = 50
+
 
 local Friends = {}
 
@@ -74,25 +73,7 @@ FriendsTab:AddTextbox({
     end
 })
 
--- Function to perform SpinBot
-local function spinbot()
-    while SpinBotEnabled do
-        local target = getClosestPlayer()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            -- Snap to target's head while spinning
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position) * CFrame.Angles(0, math.rad(SpinSpeed), 0)
-            
-            -- Simulate left-click shooting
-            mouse1press()
-            task.wait(0.1) -- Small delay to register the click
-            mouse1release()
-        else
-            -- If no target, spin in place
-            Camera.CFrame = Camera.CFrame * CFrame.Angles(0, math.rad(SpinSpeed), 0)
-        end
-        task.wait(0.01) -- Prevent script lag
-    end
-end
+
 
 -- Create FOV Circle
 local FOVCircle = Drawing.new("Circle")
@@ -411,28 +392,5 @@ FeaturesTab:AddSlider({
 })
 
 
-FeaturesTab:AddToggle({
-    Name = "Enable SpinBot",
-    Default = false,
-    Callback = function(Value)
-        SpinBotEnabled = Value
-        if Value then
-            task.spawn(spinbot) -- Start spinning
-        end
-    end    
-})
-
-FeaturesTab:AddSlider({
-    Name = "Spin Speed",
-    Min = 10,
-    Max = 200,
-    Default = 50,
-    Color = Color3.fromRGB(0, 255, 255),
-    Increment = 5,
-    ValueName = "Speed",
-    Callback = function(Value)
-        SpinSpeed = Value
-    end    
-})
 
 OrionLib:Init()
