@@ -21,7 +21,7 @@ Themes = {
         Text = Color3.fromRGB(240, 128, 128), -- Light Coral
         TextDark = Color3.fromRGB(147, 112, 219) -- Medium Purple
     }
-}
+},
 
 	SelectedTheme = "Default",
 	Folder = nil,
