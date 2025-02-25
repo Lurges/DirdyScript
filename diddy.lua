@@ -107,6 +107,58 @@ RunService.RenderStepped:Connect(function()
     updateFOV()
 end)
 
+-- Hitbox Expander
+local function expandHitbox(player, size)
+    if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
+        local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
+            or player.Character:FindFirstChild("Torso") 
+            or player.Character:FindFirstChild("UpperTorso")
+
+        if targetPart then
+            targetPart.Size = Vector3.new(size, size, size)
+            targetPart.Transparency = 0.5
+            targetPart.Material = Enum.Material.ForceField
+            targetPart.CanCollide = false
+
+            if not targetPart:FindFirstChild("HitboxOutline") then
+                local selectionBox = Instance.new("SelectionBox")
+                selectionBox.Name = "HitboxOutline"
+                selectionBox.Adornee = targetPart
+                selectionBox.Parent = targetPart
+                selectionBox.LineThickness = 0.05
+                selectionBox.Color3 = Color3.fromRGB(0, 255, 0)
+            end
+        end
+    end
+end
+
+local function updateHitboxes(size)
+    HitboxSize = size
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and not Friends[player.UserId] then
+            expandHitbox(player, size)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if not Friends[player.UserId] then
+            expandHitbox(player, HitboxSize)
+        end
+    end)
+end)
+
+RunService.Heartbeat:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and not Friends[player.UserId] then
+            expandHitbox(player, HitboxSize)
+        end
+    end
+end)
+
+
 -- ESP Functionality
 local function highlightPlayers()
     if not ESPEnabled then return end
@@ -138,11 +190,50 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+
+local function addFriend(username)
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Name == username then
+            Friends[player.UserId] = true
+            OrionLib:MakeNotification({
+                Name = "Friend Added",
+                Content = username .. " has been added to your friend list!",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+            return
+        end
+    end
+    OrionLib:MakeNotification({
+        Name = "Error",
+        Content = "Player not found! Make sure they are in the game.",
+        Image = "rbxassetid://4483345998",
+        Time = 5
+    })
+end
+
+local FeaturesTab = Window:MakeTab({
+    Name = "Features",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+
 -- UI Setup
 local FeaturesTab = Window:MakeTab({
     Name = "Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
+})
+
+
+FeaturesTab:AddTextbox({
+    Name = "Add Friend",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(username)
+        addFriend(username)
+    end
 })
 
 FeaturesTab:AddToggle({
@@ -194,11 +285,11 @@ FeaturesTab:AddSlider({
     Min = 2,
     Max = 200,
     Default = 5,
-    Color = Color3.fromRGB(77, 77, 255),
+    Color = Color3.fromRGB(0, 255, 0),
     Increment = 1,
     ValueName = "Hitbox Size",
     Callback = function(Value)
-        HitboxSize = Value
+        updateHitboxes(Value, JitterAmount)
     end    
 })
 
