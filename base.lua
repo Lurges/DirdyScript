@@ -12,17 +12,16 @@ local OrionLib = {
 	ThemeObjects = {},
 	Connections = {},
 	Flags = {},
-Themes = {
-    Default = {
-        Main = Color3.fromRGB(255, 105, 180), -- Hot Pink
-        Second = Color3.fromRGB(186, 85, 211), -- Medium Orchid
-        Stroke = Color3.fromRGB(255, 182, 193), -- Light Pink
-        Divider = Color3.fromRGB(221, 160, 221), -- Plum
-        Text = Color3.fromRGB(240, 128, 128), -- Light Coral
-        TextDark = Color3.fromRGB(147, 112, 219) -- Medium Purple
-    }
-},
-
+	Themes = {
+		Default = {
+			Main = Color3.fromRGB(255, 105, 180),
+			Second = Color3.fromRGB(186, 85, 211),
+			Stroke = Color3.fromRGB(255, 182, 193),
+			Divider = Color3.fromRGB(221, 160, 221),
+			Text = Color3.fromRGB(240, 128, 128),
+			TextDark = Color3.fromRGB(147, 112, 219)
+		}
+	},
 	SelectedTheme = "Default",
 	Folder = nil,
 	SaveCfg = false
