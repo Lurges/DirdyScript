@@ -260,15 +260,16 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Friends = {} -- Your list of friends, you can populate this as needed
 
--- Hitbox Expander Function (Non-Collidable)
-local function expandHitbox(player, size)
+-- Hitbox Expander Function (Non-Collidable) with Jitter Effect
+local function expandHitbox(player, baseSize, jitter)
     if player ~= LocalPlayer and not Friends[player.UserId] and player.Character then
         local targetPart = player.Character:FindFirstChild("HumanoidRootPart") 
             or player.Character:FindFirstChild("Torso") 
-            or player.Character:FindFirstChild("UpperTorso") -- Use alternative parts
+            or player.Character:FindFirstChild("UpperTorso")
 
         if targetPart then
-            targetPart.Size = Vector3.new(size, size, size)
+            local newSize = baseSize + (math.random(0, 1) * 2 - 1) * jitter -- Randomly adds or subtracts jitter value
+            targetPart.Size = Vector3.new(newSize, newSize, newSize)
             targetPart.Transparency = 0.5
             targetPart.Material = Enum.Material.ForceField
 
@@ -290,11 +291,12 @@ local function expandHitbox(player, size)
 end
 
 -- Update Hitbox Expansion (Ensures all players get it)
-local function updateHitboxes(size)
-    HitboxSize = size
+local function updateHitboxes(baseSize, jitter)
+    HitboxSize = baseSize
+    JitterAmount = jitter
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, size)
+            expandHitbox(player, baseSize, jitter)
         end
     end
 end
@@ -304,7 +306,7 @@ Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         task.wait(0.5) -- Give time for character to load
         if not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize)
+            expandHitbox(player, HitboxSize, JitterAmount)
         end
     end)
 end)
@@ -312,18 +314,23 @@ end)
 -- Apply hitbox to all players (when feature is turned on)
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer and not Friends[player.UserId] then
-        expandHitbox(player, HitboxSize)
+        expandHitbox(player, HitboxSize, JitterAmount)
     end
 end
 
--- Constantly update the hitboxes for all players
+-- Constantly update the hitboxes for all players with jitter effect
 RunService.Heartbeat:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize) -- Keep expanding hitbox
+            expandHitbox(player, HitboxSize, JitterAmount) -- Keep jittering hitbox
         end
     end
 end)
+
+-- Set initial values
+local defaultHitboxSize = 5
+local jitterAmount = 1
+updateHitboxes(defaultHitboxSize, jitterAmount)
 
 
 
