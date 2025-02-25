@@ -12,15 +12,7 @@ local OrionLib = {
 	ThemeObjects = {},
 	Connections = {},
 	Flags = {},
-
-
-local function createGradient(color1, color2)
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new(color1, color2)
-    return gradient
-end
-
-Themes = {
+	Themes = {
 		Default = {
 			Main = Color3.fromRGB(25, 25, 25),
 			Second = Color3.fromRGB(32, 32, 32),
@@ -30,7 +22,6 @@ Themes = {
 			TextDark = Color3.fromRGB(150, 150, 150)
 		}
 	},
-
 	SelectedTheme = "Default",
 	Folder = nil,
 	SaveCfg = false
