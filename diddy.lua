@@ -37,14 +37,10 @@ FOVCircle.Transparency = 1
 FOVCircle.Visible = false
 
 local function updateFOV()
-    if NigBotEnabled then
-        local viewportSize = Camera.ViewportSize
-        FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
-        FOVCircle.Radius = AimFOV
-        FOVCircle.Visible = true
-    else
-        FOVCircle.Visible = false
-    end
+    local viewportSize = Camera.ViewportSize
+    FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+    FOVCircle.Radius = AimFOV
+    FOVCircle.Visible = AimlockEnabled
 end
 
 local function isPlayerVisible(player)
@@ -78,30 +74,33 @@ local function getClosestPlayer()
 end
 
 local function aimlock()
-    if not NigBotEnabled then return end
+    if not AimlockEnabled then return end
 
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
+        if TriggerBotEnabled then
+            mouse1click()
+        end
     end
 end
 
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        NigBotEnabled = true
+        AimlockEnabled = true
         updateFOV()
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        NigBotEnabled = false
+        AimlockEnabled = false
         updateFOV()
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    if NigBotEnabled then
+    if AimlockEnabled then
         aimlock()
     end
     updateFOV()
@@ -159,10 +158,8 @@ RunService.Heartbeat:Connect(function()
 end)
 
 
--- ESP Functionality
+-- ESP Functionality (Always Active, Independent of Hitbox Expander)
 local function highlightPlayers()
-    if not ESPEnabled then return end
-    
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             local highlight = player.Character:FindFirstChild("ESP_Highlight")
@@ -187,6 +184,25 @@ RunService.Heartbeat:Connect(function()
                 if highlight then highlight:Destroy() end
             end
         end
+    end
+    
+    if AimlockEnabled then
+        aimlock()
+    end
+    updateFOV()
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        AimlockEnabled = true
+        updateFOV()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        AimlockEnabled = false
+        updateFOV()
     end
 end)
 
@@ -245,6 +261,14 @@ FeaturesTab:AddToggle({
     Callback = function(Value)
         NigBotEnabled = Value
         updateFOV()
+    end    
+})
+
+FeaturesTab:AddToggle({
+    Name = "Trigger Bot",
+    Default = false,
+    Callback = function(Value)
+        TriggerBotEnabled = Value
     end    
 })
 
