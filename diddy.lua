@@ -78,9 +78,18 @@ local function aimlock()
 
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
-        Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
+        local headPosition = target.Character.Head.Position
+        local lookVector = (headPosition - Camera.CFrame.Position).unit
+        
+        -- Adjust camera and aim properly
+        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, headPosition)
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.lookAt(LocalPlayer.Character.HumanoidRootPart.Position, headPosition)
+        
+        -- Fire the gun accurately
         if TriggerBotEnabled then
-            mouse1click()
+            mouse1press()
+            task.wait(0.05)
+            mouse1release()
         end
     end
 end
@@ -105,6 +114,7 @@ RunService.RenderStepped:Connect(function()
     end
     updateFOV()
 end)
+
 
 -- Hitbox Expander
 local function expandHitbox(player, size)
