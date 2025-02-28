@@ -36,6 +36,21 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 FOVCircle.Visible = false
 
+
+local function removeCooldown()
+    for _, v in pairs(getgc(true)) do
+        if type(v) == "table" then
+            if rawget(v, "FireRate") then
+                v.FireRate = NoCooldownEnabled and math.huge or 1
+            end
+            if rawget(v, "Cooldown") then
+                v.Cooldown = NoCooldownEnabled and 0 or 1
+            end
+        end
+    end
+end
+
+
 local function updateFOV()
     local viewportSize = Camera.ViewportSize
     FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
@@ -279,6 +294,15 @@ FeaturesTab:AddToggle({
     Default = false,
     Callback = function(Value)
         TriggerBotEnabled = Value
+    end    
+})
+
+FeaturesTab:AddToggle({
+    Name = "No Cooldown",
+    Default = false,
+    Callback = function(Value)
+        NoCooldownEnabled = Value
+        removeCooldown()
     end    
 })
 
