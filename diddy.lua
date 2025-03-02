@@ -39,16 +39,14 @@ FOVCircle.Visible = false
 
 local function removeCooldown()
     for _, v in pairs(getgc(true)) do
-        if type(v) == "table" then
-            if rawget(v, "FireRate") then
-                v.FireRate = NoCooldownEnabled and math.huge or 1
-            end
-            if rawget(v, "Cooldown") then
-                v.Cooldown = NoCooldownEnabled and 0 or 1
-            end
-            if rawget(v, "LastShot") then
-                v.LastShot = NoCooldownEnabled and 0 or tick()
-            end
+        if type(v) == "table" and rawget(v, "FireRate") then
+            v.FireRate = NoCooldownEnabled and math.huge or v.FireRate
+        end
+        if type(v) == "table" and rawget(v, "Cooldown") then
+            v.Cooldown = NoCooldownEnabled and 0 or v.Cooldown
+        end
+        if type(v) == "table" and rawget(v, "LastShot") then
+            v.LastShot = NoCooldownEnabled and 0 or v.LastShot
         end
     end
 end
@@ -96,7 +94,6 @@ local function aimlock()
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         local headPosition = target.Character.Head.Position
-        local direction = (headPosition - Camera.CFrame.Position).unit
 
         -- Only adjust the camera, not the player's movement
         Camera.CFrame = Camera.CFrame:Lerp(CFrame.lookAt(Camera.CFrame.Position, headPosition), AimStrength / 100)
@@ -158,13 +155,38 @@ local function updateHitboxes(size)
     end
 end
 
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        if not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize)
+-- ESP Functionality (Fixed)
+local function highlightPlayers()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("ESP_Highlight")
+            if not highlight then
+                highlight = Instance.new("Highlight")
+                highlight.Name = "ESP_Highlight"
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.FillTransparency = 0.5
+                highlight.Parent = player.Character
+            end
         end
-    end)
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    if ESPEnabled then
+        highlightPlayers()
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                local highlight = player.Character:FindFirstChild("ESP_Highlight")
+                if highlight then highlight:Destroy() end
+            end
+        end
+    end
+
+    if AimlockEnabled then
+        aimlock()
+    end
+    updateFOV()
 end)
 
 -- UI Setup
@@ -172,32 +194,6 @@ local FeaturesTab = Window:MakeTab({
     Name = "Features",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
-})
-
-FeaturesTab:AddTextbox({
-    Name = "Add Friend",
-    Default = "",
-    TextDisappear = true,
-    Callback = function(username)
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.Name == username then
-                Friends[player.UserId] = true
-                OrionLib:MakeNotification({
-                    Name = "Friend Added",
-                    Content = username .. " has been added to your friend list!",
-                    Image = "rbxassetid://4483345998",
-                    Time = 5
-                })
-                return
-            end
-        end
-        OrionLib:MakeNotification({
-            Name = "Error",
-            Content = "Player not found! Make sure they are in the game.",
-            Image = "rbxassetid://4483345998",
-            Time = 5
-        })
-    end
 })
 
 FeaturesTab:AddToggle({
@@ -241,6 +237,19 @@ FeaturesTab:AddSlider({
     Callback = function(Value)
         AimFOV = Value
         updateFOV()
+    end    
+})
+
+FeaturesTab:AddSlider({
+    Name = "Hitbox Expander",
+    Min = 2,
+    Max = 200,
+    Default = 5,
+    Color = Color3.fromRGB(77, 77, 255),
+    Increment = 1,
+    ValueName = "Hitbox Size",
+    Callback = function(Value)
+        updateHitboxes(Value)
     end    
 })
 
