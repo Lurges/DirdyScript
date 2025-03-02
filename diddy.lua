@@ -22,7 +22,8 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
 local ESPEnabled = false
-local NigBotEnabled = false
+local AimlockEnabled = false
+local NoCooldownEnabled = false
 local HitboxSize = 5
 local AimFOV = 100
 local AimStrength = 100
@@ -36,7 +37,6 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 1
 FOVCircle.Visible = false
 
-
 local function removeCooldown()
     for _, v in pairs(getgc(true)) do
         if type(v) == "table" then
@@ -46,10 +46,12 @@ local function removeCooldown()
             if rawget(v, "Cooldown") then
                 v.Cooldown = NoCooldownEnabled and 0 or 1
             end
+            if rawget(v, "LastShot") then
+                v.LastShot = NoCooldownEnabled and 0 or tick()
+            end
         end
     end
 end
-
 
 local function updateFOV()
     local viewportSize = Camera.ViewportSize
@@ -94,18 +96,10 @@ local function aimlock()
     local target = getClosestPlayer()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         local headPosition = target.Character.Head.Position
-        local lookVector = (headPosition - Camera.CFrame.Position).unit
-        
-        -- Adjust camera and aim properly
-        Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, headPosition)
-        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.lookAt(LocalPlayer.Character.HumanoidRootPart.Position, headPosition)
-        
-        -- Fire the gun accurately
-        if TriggerBotEnabled then
-            mouse1press()
-            task.wait(0.05)
-            mouse1release()
-        end
+        local direction = (headPosition - Camera.CFrame.Position).unit
+
+        -- Only adjust the camera, not the player's movement
+        Camera.CFrame = Camera.CFrame:Lerp(CFrame.lookAt(Camera.CFrame.Position, headPosition), AimStrength / 100)
     end
 end
 
@@ -129,7 +123,6 @@ RunService.RenderStepped:Connect(function()
     end
     updateFOV()
 end)
-
 
 -- Hitbox Expander
 local function expandHitbox(player, size)
@@ -174,87 +167,6 @@ Players.PlayerAdded:Connect(function(player)
     end)
 end)
 
-RunService.Heartbeat:Connect(function()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and not Friends[player.UserId] then
-            expandHitbox(player, HitboxSize)
-        end
-    end
-end)
-
-
--- ESP Functionality (Always Active, Independent of Hitbox Expander)
-local function highlightPlayers()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local highlight = player.Character:FindFirstChild("ESP_Highlight")
-            if not highlight then
-                highlight = Instance.new("Highlight")
-                highlight.Name = "ESP_Highlight"
-                highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                highlight.FillTransparency = 0.5
-                highlight.Parent = player.Character
-            end
-        end
-    end
-end
-
-RunService.Heartbeat:Connect(function()
-    if ESPEnabled then
-        highlightPlayers()
-    else
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.Character then
-                local highlight = player.Character:FindFirstChild("ESP_Highlight")
-                if highlight then highlight:Destroy() end
-            end
-        end
-    end
-    
-    if AimlockEnabled then
-        aimlock()
-    end
-    updateFOV()
-end)
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        AimlockEnabled = true
-        updateFOV()
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        AimlockEnabled = false
-        updateFOV()
-    end
-end)
-
-
-local function addFriend(username)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name == username then
-            Friends[player.UserId] = true
-            OrionLib:MakeNotification({
-                Name = "Friend Added",
-                Content = username .. " has been added to your friend list!",
-                Image = "rbxassetid://4483345998",
-                Time = 5
-            })
-            return
-        end
-    end
-    OrionLib:MakeNotification({
-        Name = "Error",
-        Content = "Player not found! Make sure they are in the game.",
-        Image = "rbxassetid://4483345998",
-        Time = 5
-    })
-end
-
-
-
 -- UI Setup
 local FeaturesTab = Window:MakeTab({
     Name = "Features",
@@ -262,13 +174,29 @@ local FeaturesTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-
 FeaturesTab:AddTextbox({
     Name = "Add Friend",
     Default = "",
     TextDisappear = true,
     Callback = function(username)
-        addFriend(username)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Name == username then
+                Friends[player.UserId] = true
+                OrionLib:MakeNotification({
+                    Name = "Friend Added",
+                    Content = username .. " has been added to your friend list!",
+                    Image = "rbxassetid://4483345998",
+                    Time = 5
+                })
+                return
+            end
+        end
+        OrionLib:MakeNotification({
+            Name = "Error",
+            Content = "Player not found! Make sure they are in the game.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
     end
 })
 
@@ -277,23 +205,6 @@ FeaturesTab:AddToggle({
     Default = false,
     Callback = function(Value)
         ESPEnabled = Value
-    end    
-})
-
-FeaturesTab:AddToggle({
-    Name = "NigBot",
-    Default = false,
-    Callback = function(Value)
-        NigBotEnabled = Value
-        updateFOV()
-    end    
-})
-
-FeaturesTab:AddToggle({
-    Name = "Trigger Bot",
-    Default = false,
-    Callback = function(Value)
-        TriggerBotEnabled = Value
     end    
 })
 
@@ -330,19 +241,6 @@ FeaturesTab:AddSlider({
     Callback = function(Value)
         AimFOV = Value
         updateFOV()
-    end    
-})
-
-FeaturesTab:AddSlider({
-    Name = "BigBackExpander",
-    Min = 2,
-    Max = 200,
-    Default = 5,
-    Color = Color3.fromRGB(77, 77, 255),
-    Increment = 1,
-    ValueName = "Hitbox Size",
-    Callback = function(Value)
-        updateHitboxes(Value, JitterAmount)
     end    
 })
 
